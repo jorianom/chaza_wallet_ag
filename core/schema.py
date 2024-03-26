@@ -1,12 +1,8 @@
 import graphene
 import requests
 
+from core.typeDefs import Char
 
-class Char(graphene.ObjectType):
-    id = graphene.ID()
-    name = graphene.String()
-    status = graphene.String()
-    species = graphene.String()
 
 
 class Query(graphene.ObjectType):
