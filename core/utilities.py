@@ -1,5 +1,7 @@
+import json
 import graphene
 from graphql import GraphQLError
+from core.producer import Producer
 import requests
 
 from core.typeDefs import Recharge, Method
@@ -60,6 +62,8 @@ class CreateRecharge(graphene.Mutation):
 
     def mutate(self, info, user, amount, method, date):
         route = "recharge"
+        producer = Producer()
+        producer.connect("recharges")
         data = {
             'user': user,
             'amount': amount,
@@ -68,19 +72,21 @@ class CreateRecharge(graphene.Mutation):
             'status': 'pending'
         }
 
+        request_json = json.dumps(data)
         url = f"{urlGolang}{route}"
-        response = requests.post(url, json=data)
-        if response.status_code == 200:
-            data = response.json().get("recharge")
+        producer.publish(request_json)
+        # response = requests.post(url, json=data)
+        # if response.status_code == 200:
+        #     data = response.json().get("recharge")
 
-            recharge = Recharge(
-                id=data['id'],
-                user=data['user'],
-                amount=data['amount'],
-                method=data['method'],
-                date=data['date'],
-                status=data['status']
-            )
-            return CreateRecharge(ok=True, recharge=recharge)
-        else:
-            raise GraphQLError('Hubo un error al realizar la petición')
+        #     recharge = Recharge(
+        #         id=data['id'],
+        #         user=data['user'],
+        #         amount=data['amount'],
+        #         method=data['method'],
+        #         date=data['date'],
+        #         status=data['status']
+        #     )
+        #     return CreateRecharge(ok=True, recharge=recharge)
+        # else:
+        #     raise GraphQLError('Hubo un error al realizar la petición')
