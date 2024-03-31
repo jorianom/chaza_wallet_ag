@@ -16,6 +16,17 @@ class Query(graphene.ObjectType):
     def resolve_getMethods(self, info, id):
         return getMethodsResolve(id)
 
+    # Users python
+
+    getUser = graphene.Field(User,id=graphene.ID())
+    getUsers = graphene.List(User)
+
+    def resolve_getUser(self,info,id):
+        return getUser(id)
+    
+    def resolve_getUsers(self,info):
+        return getUsers()
+
     ''' # Examples
     hello = graphene.String(default_value="Hello W")
     external_data = graphene.Field(Char)
@@ -61,5 +72,11 @@ class Mutation(graphene.ObjectType):
     updateUserAuth = UpdateUserAuth.Field()
     deleteUserAuth = DeleteUserAuth.Field()
     authenticateUserAuth = AuthenticateUserAuth.Field()
+
+    # users_ms python Django
+
+    postUsers = CreateUser.Field()
+    updateUser = UpdateUser.Field()
+    deleteUser = DeleteUser.Field()
 
 schema = graphene.Schema(query=Query, mutation=Mutation)

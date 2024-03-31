@@ -41,3 +41,18 @@ urlAuth = "http://host.docker.internal:8080/auth/"
 class UserAuth(graphene.ObjectType):
     username = graphene.String()
     password = graphene.String()
+
+# users_ms python
+urlUsers = "http://localhost:4000/UsersUN/"
+
+class User(graphene.ObjectType):
+    id = graphene.ID()
+    first_name = graphene.String()
+    last_name = graphene.String()
+    role = graphene.String()
+    date_birth = graphene.String()
+    phone = graphene.String()
+    document_type = graphene.String()
+    document_number = graphene.String()
+
+
