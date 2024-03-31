@@ -42,6 +42,44 @@ def getMethodsResolve(id):
     else:
         return None
 
+#Queries for User_ms python
+def getUser(id):
+    response = requests.get(f"{urlUsers}{id}")
+    if response.status_code == 200:
+        data = response.json()
+        #result = response.json()
+        
+        # print(result[1]["id"])
+        return User(
+            id=data.get('id'),  # .get evita errores por campo no existente
+            first_name=data.get('first_name'),
+            last_name=data.get('last_name'),
+            role=data.get('role'),
+            date_birth=data.get('date_birth'),
+            phone=data.get('phone'),
+            document_type=data.get('document_type'),
+            document_number=data.get('document_number')
+        )
+    else:
+        return None
+
+def getUsers():
+    response = requests.get(f"{urlUsers}")
+    if response.status_code == 200:
+        result = response.json()
+        return [User(
+            id=data.get('id'),  # .get evita errores por campo no existente
+            first_name=data.get('first_name'),
+            last_name=data.get('last_name'),
+            role=data.get('role'),
+            date_birth=data.get('date_birth'),
+            phone=data.get('phone'),
+            document_type=data.get('document_type'),
+            document_number=data.get('document_number')
+        )for data in result]
+    else:
+        return None
+
 # Mutations Microserver Golang
 class CreateRecharge(graphene.Mutation):
     class Arguments:
@@ -188,3 +226,89 @@ class AuthenticateUserAuth(graphene.Mutation):
             return AuthenticateUserAuth(ok=True, token=token)
         else:
             raise GraphQLError('Hubo un error al realizar la petición')
+
+#Mutations users_ms 
+# CreateUser
+class CreateUser(graphene.Mutation):
+    class Arguments:
+
+        first_name = graphene.String(required=True)
+        last_name = graphene.String(required=True)
+        date_birth = graphene.String(required=True)
+        role = graphene.String(required=True)
+        phone = graphene.String(required=True)
+        document_type = graphene.String(required=True)
+        document_number = graphene.String(required=True)
+    ok = graphene.Boolean()
+    user = graphene.Field(User)
+
+    def mutate(self, info, first_name,last_name,date_birth,role,phone,document_type,document_number ):
+        data = {
+            'first_name': first_name,
+            'last_name': last_name,
+            'role': role,
+            'date_birth': date_birth,
+            'phone': phone,
+            'document_type': document_type,
+            'document_number': document_number
+        }
+
+        url = f"{urlUsers}"
+        response = requests.post(url, json=data)
+
+        if response.status_code == 201:
+            user = User(
+                first_name,
+                last_name,
+                role,
+                date_birth,
+                phone,
+                document_type,
+                document_number
+            )
+            return CreateUser(ok=True, user=user)
+        else:
+            raise GraphQLError('Hubo un error al realizar la petición')
+
+# Update user credentials
+class UpdateUser(graphene.Mutation):
+    class Arguments:
+        # id = graphene.String(required=True)
+        id = graphene.ID(required=True)
+        userProperty = graphene.String(required=True)
+
+    ok = graphene.Boolean()
+    user = graphene.Field(User)
+
+    def mutate(self, info, id, userProperty):
+        data = {
+            'phone': userProperty
+        }
+
+        url = f"{urlUsers}{id}"
+        response = requests.put(url, json=data)
+
+        if response.status_code == 200:
+            user = response.json()            
+            return UpdateUser(ok=True,user=user)
+        else:
+            raise GraphQLError('Hubo un error al realizar la petición')
+
+# Delete user credentials
+class DeleteUser(graphene.Mutation):
+    class Arguments:
+        # id = graphene.String(required=True)
+        id = graphene.ID(required=True)
+
+    ok = graphene.Boolean()
+
+    def mutate(self, info, id):
+
+        url = f"{urlUsers}{id}"
+        response = requests.delete(url)
+
+        if response.status_code == 204:
+            return DeleteUser(ok=True)
+        else:
+            raise GraphQLError('Hubo un error al realizar la petición')
+
