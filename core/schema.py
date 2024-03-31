@@ -1,9 +1,8 @@
 import graphene
 import requests
 
-from core.typeDefs import Char, Recharge, Method
-from core.utilities import CreateRecharge, getRechargesResolve,  getMethodsResolve
-
+from core.typeDefs import *
+from core.utilities import *
 
 class Query(graphene.ObjectType):
 
@@ -17,7 +16,7 @@ class Query(graphene.ObjectType):
     def resolve_getMethods(self, info, id):
         return getMethodsResolve(id)
 
-    # Examples:
+    ''' # Examples
     hello = graphene.String(default_value="Hello W")
     external_data = graphene.Field(Char)
     external_data2 = graphene.List(Char, id=graphene.ID())
@@ -50,11 +49,17 @@ class Query(graphene.ObjectType):
             )
         else:
             return None
-
+'''
 
 class Mutation(graphene.ObjectType):
 
+    # Microserver Golang
     postRecharge = CreateRecharge.Field()
 
+    # auth_ms Java Spring
+    postUserAuth = CreateUserAuth.Field()
+    updateUserAuth = UpdateUserAuth.Field()
+    deleteUserAuth = DeleteUserAuth.Field()
+    authenticateUserAuth = AuthenticateUserAuth.Field()
 
 schema = graphene.Schema(query=Query, mutation=Mutation)
