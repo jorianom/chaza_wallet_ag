@@ -80,6 +80,21 @@ def getUsers():
     else:
         return None
 
+# Queries for transactions_ms TypeScript
+def getTransactionsResolve():
+    response = requests.get(f"{urlTransactions}/transactions")
+    if response.status_code == 200:
+        return response.json()
+    else:
+        return None
+
+def getTransactionsForUserResolve(id):
+    response = requests.get(f"{urlTransactions}/transactions/{id}")
+    if response.status_code == 200:
+        return response.json()
+    else:
+        return None
+
 # Mutations Microserver Golang
 class CreateRecharge(graphene.Mutation):
     class Arguments:
@@ -312,3 +327,29 @@ class DeleteUser(graphene.Mutation):
         else:
             raise GraphQLError('Hubo un error al realizar la petición')
 
+# Mutations for transactions_ms TypeScript
+class AddTransaction(graphene.Mutation):
+    class Arguments:
+        amount = graphene.Float(required=True)
+        dateTime = graphene.String(required=True)
+        description = graphene.String(required=True)
+        senderId = graphene.Int(required=True)
+        receiverId = graphene.Int(required=True)
+    
+    transactionId = graphene.Int()
+
+    def mutate(self, info, amount, dateTime, description, senderId, receiverId):
+        response = requests.post(
+            f"{urlTransactions}/transactions",
+            json={
+                "amount": amount,
+                "dateTime": dateTime,
+                "description": description,
+                "senderId": senderId,
+                "receiverId": receiverId
+            }
+        )
+        if response.status_code == 200:
+            return AddTransaction(transactionId=response.json().get('transactionId'))
+        else:
+            raise GraphQLError('Failed to add transaction')
