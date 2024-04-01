@@ -311,4 +311,124 @@ class DeleteUser(graphene.Mutation):
             return DeleteUser(ok=True)
         else:
             raise GraphQLError('Hubo un error al realizar la petición')
+        
+# Queries Products_ms
+def getProduct(id):
+    route = "Product/"
+    response = requests.get(f"{urlProducts}{route}{id}")
+    if response.status_code == 200:
+        data = response.json()
+        #print(result)
+        #print(result[1]["id"])
+        return Product(
+            id=data.get('id'),  # .get evita errores por campo no existente
+            userID=data.get('userID'),
+            kind=data.get('kind'),
+            ea=data.get('ea'),
+            amount=data.get('amount'),
+            installments=data.get('installments'),
+            dateTime=data.get('dateTime')
+        )
+    else:
+        return None
+    
+# Mutations Products_ms
+# Create Product
+class CreateProduct(graphene.Mutation):
+    class Arguments:
+        id = graphene.ID(required=True)
+        userID = graphene.String(required=True)
+        kind = graphene.String(required=True)
+        ea = graphene.String(required=True)
+        amount = graphene.Int(required=True)
+        installments = graphene.Int(required=True)
+        dateTime = graphene.String(required=True)
+    ok = graphene.Boolean()
+    product = graphene.Field(Product)
+
+    def mutate(self,info, id, userID, kind, ea, amount, installments, dateTime ):
+        route = "Product"
+        data = {
+            "id": id,
+            "userID": userID,
+            "kind": kind,
+            "ea": ea,
+            "amount": amount,
+            "installments": installments,
+            "dateTime": dateTime,
+        }
+
+        
+        url = f"{urlProducts}{route}"        
+        response = requests.post(url, json=data)
+        
+        if response.status_code == 200:
+            product = Product(
+                id,
+                userID,
+                kind,
+                ea,
+                amount,
+                installments,
+                dateTime
+            )
+            return CreateProduct(ok=True, product=product)
+        else:
+            raise GraphQLError('Hubo un error al realizar la petición')
+        
+# Update Product 
+
+class UpdateProduct(graphene.Mutation):
+    class Arguments:
+        id = graphene.ID(required=True)
+        userID = graphene.String(required=True)
+        kind = graphene.String(required=True)
+        ea = graphene.String(required=True)
+        amount = graphene.Int(required=True)
+        installments = graphene.Int(required=True)
+        dateTime = graphene.String(required=True)
+        
+    ok = graphene.Boolean()
+    product = graphene.Field(Product)
+    
+    def mutate(self,info, id, userID, kind, ea, amount, installments, dateTime ):
+        route = "Product"
+        data = {
+            "id": id,
+            "userID": userID,
+            "kind": kind,
+            "ea": ea,
+            "amount": amount,
+            "installments": installments,
+            "dateTime": dateTime,
+        }
+        
+        url = f"{urlProducts}{route}"
+        response = requests.put(url, json=data) 
+        
+        if response.status_code == 200:
+            product = response.json()            
+            return UpdateProduct(ok=True, product=product)
+        else:
+            raise GraphQLError('Hubo un error al realizar la petición')
+
+# Delete Product 
+
+class DeleteProduct(graphene.Mutation):
+    class Arguments:
+        id = graphene.ID(required=True)
+        
+    ok = graphene.Boolean()
+    
+    def mutate(self, info, id):
+        
+        route = "Product/"
+        url = f"{urlProducts}{route}{id}"   
+        response = requests.delete(url) 
+        
+        
+        if response.status_code == 200:
+            return DeleteProduct(ok=True)
+        else:
+            raise GraphQLError('Hubo un error al realizar la petición')
 

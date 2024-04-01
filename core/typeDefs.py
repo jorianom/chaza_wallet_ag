@@ -54,5 +54,18 @@ class User(graphene.ObjectType):
     phone = graphene.String()
     document_type = graphene.String()
     document_number = graphene.String()
+    
+# products_ms c#
+urlProducts = "http://localhost:3000/api/"
+
+class Product(graphene.ObjectType):
+    id = graphene.ID()
+    userID = graphene.String()
+    kind = graphene.String()
+    ea = graphene.String()
+    amount = graphene.String()
+    installments = graphene.String()
+    dateTime = graphene.String()
+    
 
 
