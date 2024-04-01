@@ -55,4 +55,13 @@ class User(graphene.ObjectType):
     document_type = graphene.String()
     document_number = graphene.String()
 
+# transactions_ms TypeScript
+urlTransactions = "http://localhost:3003"
 
+class Transaction(graphene.ObjectType):
+    transactionId = graphene.Int()
+    amount = graphene.Float()
+    dateTime = graphene.String()
+    description = graphene.String()
+    senderId = graphene.Int()
+    receiverId = graphene.Int()

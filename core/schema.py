@@ -26,6 +26,17 @@ class Query(graphene.ObjectType):
     
     def resolve_getUsers(self,info):
         return getUsers()
+    
+    # Transactions
+    getTransactions = graphene.List(Transaction)
+
+    def resolve_getTransactions(self, info):
+        return getTransactionsResolve()
+    
+    getTransactionsForUser = graphene.List(Transaction, id=graphene.Int())
+
+    def resolve_getTransactionsForUser(self, info, id):
+        return getTransactionsForUserResolve(id)
 
     ''' # Examples
     hello = graphene.String(default_value="Hello W")
@@ -78,5 +89,8 @@ class Mutation(graphene.ObjectType):
     postUsers = CreateUser.Field()
     updateUser = UpdateUser.Field()
     deleteUser = DeleteUser.Field()
+
+    # transactions_ms TypeScript
+    addTransaction = AddTransaction.Field()
 
 schema = graphene.Schema(query=Query, mutation=Mutation)
