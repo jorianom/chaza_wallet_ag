@@ -27,6 +27,14 @@ class Query(graphene.ObjectType):
     def resolve_getUsers(self,info):
         return getUsers()
     
+
+    # Products c#
+    
+    getProduct = graphene.Field(Product,id=graphene.ID())
+    
+    def resolve_getProduct(self, info, id):
+        return getProduct(id)
+
     # Transactions
     getTransactions = graphene.List(Transaction)
 
@@ -37,6 +45,7 @@ class Query(graphene.ObjectType):
 
     def resolve_getTransactionsForUser(self, info, id):
         return getTransactionsForUserResolve(id)
+
 
     ''' # Examples
     hello = graphene.String(default_value="Hello W")
@@ -89,6 +98,13 @@ class Mutation(graphene.ObjectType):
     postUsers = CreateUser.Field()
     updateUser = UpdateUser.Field()
     deleteUser = DeleteUser.Field()
+    
+    # products_ms c# firebase
+    
+    postProduct = CreateProduct.Field()
+    updateProduct = UpdateProduct.Field()
+    deleteProduct = DeleteProduct.Field()
+    
 
     # transactions_ms TypeScript
     addTransaction = AddTransaction.Field()
