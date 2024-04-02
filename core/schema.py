@@ -27,12 +27,25 @@ class Query(graphene.ObjectType):
     def resolve_getUsers(self,info):
         return getUsers()
     
+
     # Products c#
     
     getProduct = graphene.Field(Product,id=graphene.ID())
     
     def resolve_getProduct(self, info, id):
         return getProduct(id)
+
+    # Transactions
+    getTransactions = graphene.List(Transaction)
+
+    def resolve_getTransactions(self, info):
+        return getTransactionsResolve()
+    
+    getTransactionsForUser = graphene.List(Transaction, id=graphene.Int())
+
+    def resolve_getTransactionsForUser(self, info, id):
+        return getTransactionsForUserResolve(id)
+
 
     ''' # Examples
     hello = graphene.String(default_value="Hello W")
@@ -92,5 +105,8 @@ class Mutation(graphene.ObjectType):
     updateProduct = UpdateProduct.Field()
     deleteProduct = DeleteProduct.Field()
     
+
+    # transactions_ms TypeScript
+    addTransaction = AddTransaction.Field()
 
 schema = graphene.Schema(query=Query, mutation=Mutation)

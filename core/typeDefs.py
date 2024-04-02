@@ -68,4 +68,13 @@ class Product(graphene.ObjectType):
     dateTime = graphene.String()
     
 
+# transactions_ms TypeScript
+urlTransactions = "http://localhost:3003"
 
+class Transaction(graphene.ObjectType):
+    transactionId = graphene.Int()
+    amount = graphene.Float()
+    dateTime = graphene.String()
+    description = graphene.String()
+    senderId = graphene.Int()
+    receiverId = graphene.Int()
