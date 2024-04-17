@@ -357,6 +357,8 @@ class AuthenticateUserAuth(graphene.Mutation):
         if response.status_code == 200:
             token = response.json().get("accessToken")
             return AuthenticateUserAuth(ok=True, token=token)
+        elif response.status_code == 401:
+            raise GraphQLError('Usuario o contraseña incorrectos')
         else:
             raise GraphQLError('Hubo un error al realizar la petición')
 
