@@ -15,7 +15,7 @@ class Producer:
             pika.ConnectionParameters(host=RABBITMQ_HOST, port=RABBITMQ_PORT))
         self.channel = self.connection.channel()
         self.RABBITMQ_QUEUE = queue
-        self.channel.queue_declare(queue=self.RABBITMQ_QUEUE)
+        self.channel.queue_declare(queue=self.RABBITMQ_QUEUE, durable=True)
         # self.channel.basic_publish(exchange='',
         #                            routing_key='hello',
         #                            body='Hello World!')

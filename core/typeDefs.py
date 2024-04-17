@@ -10,7 +10,7 @@ class Char(graphene.ObjectType):
 '''
 
 # Microserver Golang
-urlGolang = "http://localhost:3000/api/"
+urlGolang = "http://localhost:5000/api/"
 
 class Recharge(graphene.ObjectType):
     id = graphene.String()
@@ -29,14 +29,19 @@ class Method(graphene.ObjectType):
     number = graphene.String()
     type = graphene.String()
     sucursal = graphene.String()
+    
+class Response(graphene.ObjectType):
+    message = graphene.String()
+    status = graphene.String()
+    data = graphene.ObjectType()
 
-class RechargeResponse(graphene.ObjectType):
+class MethodResponse(graphene.ObjectType):
     id = graphene.ID()
     status = graphene.Int()
     recharge = graphene.ObjectType()
 
 # auth_ms Java Spring
-urlAuth = "http://host.docker.internal:8080/auth/"
+urlAuth = "http://localhost:8080/auth/"
 
 class UserAuth(graphene.ObjectType):
     username = graphene.String()

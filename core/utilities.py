@@ -7,6 +7,8 @@ import requests
 from core.typeDefs import *
 
 # Queries Microserver Golang
+
+
 def getRechargesResolve(id):
     route = "recharges/"
     response = requests.get(f"{urlGolang}{route}{id}")
@@ -23,6 +25,7 @@ def getRechargesResolve(id):
         )for data in result]
     else:
         return None
+
 
 def getMethodsResolve(id):
     route = "methods/"
@@ -42,13 +45,15 @@ def getMethodsResolve(id):
     else:
         return None
 
-#Queries for User_ms python
+# Queries for User_ms python
+
+
 def getUser(id):
     response = requests.get(f"{urlUsers}{id}")
     if response.status_code == 200:
         data = response.json()
-        #result = response.json()
-        
+        # result = response.json()
+
         # print(result[1]["id"])
         return User(
             id=data.get('id'),  # .get evita errores por campo no existente
@@ -62,6 +67,7 @@ def getUser(id):
         )
     else:
         return None
+
 
 def getUsers():
     response = requests.get(f"{urlUsers}")
@@ -81,12 +87,15 @@ def getUsers():
         return None
 
 # Queries for transactions_ms TypeScript
+
+
 def getTransactionsResolve():
     response = requests.get(f"{urlTransactions}/transactions")
     if response.status_code == 200:
         return response.json()
     else:
         return None
+
 
 def getTransactionsForUserResolve(id):
     response = requests.get(f"{urlTransactions}/transactions/{id}")
@@ -96,6 +105,8 @@ def getTransactionsForUserResolve(id):
         return None
 
 # Mutations Microserver Golang
+
+
 class CreateRecharge(graphene.Mutation):
     class Arguments:
         # id = graphene.String(required=True)
@@ -105,7 +116,7 @@ class CreateRecharge(graphene.Mutation):
         date = graphene.String(required=True)
         status = graphene.String()
     ok = graphene.Boolean()
-    recharge = graphene.Field(Recharge)
+    response = graphene.Field(Response)
 
     def mutate(self, info, user, amount, method, date):
         route = "recharge"
@@ -122,6 +133,10 @@ class CreateRecharge(graphene.Mutation):
         request_json = json.dumps(data)
         url = f"{urlGolang}{route}"
         producer.publish(request_json)
+        response = Response(
+            message="Recarga en proceso ..."
+        )
+        return CreateRecharge(ok=True, response=response)
         # response = requests.post(url, json=data)
         # if response.status_code == 200:
         #     data = response.json().get("recharge")
@@ -138,8 +153,105 @@ class CreateRecharge(graphene.Mutation):
         # else:
         #     raise GraphQLError('Hubo un error al realizar la petición')
 
+
+class CreateMethod(graphene.Mutation):
+    class Arguments:
+        user = graphene.String(required=True)
+        name = graphene.String(required=True)
+        titular = graphene.String(required=True)
+        duedate = graphene.String(required=True)
+        number = graphene.String(required=True)
+        type = graphene.String(required=True)
+        sucursal = graphene.String(required=True)
+    ok = graphene.Boolean()
+    response = graphene.Field(MethodResponse)
+
+    def mutate(self, info,  user, name, titular, duedate, number, type, sucursal):
+        route = "method"
+        data = {
+            'user': user,
+            'name': name,
+            'titular': titular,
+            'duedate': duedate,
+            'number': number,
+            'type': type,
+            'sucursal': sucursal
+        }
+        url = f"{urlGolang}{route}"
+        response = requests.post(url, json=data)
+        if response.status_code == 200:
+            json = response.json()
+            response = MethodResponse(
+                id=json['id'],
+                status=json['status']
+            )
+            return CreateMethod(ok=True, response=response)
+        else:
+            raise GraphQLError('Hubo un error al realizar la petición')
+
+
+class DeleteMethod(graphene.Mutation):
+    class Arguments:
+        id = graphene.String(required=True)
+    ok = graphene.Boolean()
+    response = graphene.Field(Response)
+
+    def mutate(self, info, id):
+        route = "method/"+id
+
+        url = f"{urlGolang}{route}"
+        response = requests.delete(url)
+        if response.status_code == 200:
+            data = response.json()
+            print(response.json())
+            response = Response(
+                message=data['message'],
+                status=data['status']
+            )
+            return DeleteMethod(ok=True, response=response)
+        else:
+            raise GraphQLError('Hubo un error al realizar la petición')
+
+
+class UpdateMethod(graphene.Mutation):
+    class Arguments:
+        id = graphene.String(required=True)
+        user = graphene.String(required=True)
+        name = graphene.String(required=True)
+        titular = graphene.String(required=True)
+        duedate = graphene.String(required=True)
+        number = graphene.String(required=True)
+        type = graphene.String(required=True)
+        sucursal = graphene.String(required=True)
+    ok = graphene.Boolean()
+    response = graphene.Field(Response)
+
+    def mutate(self, info, id, user, name, titular, duedate, number, type, sucursal):
+        route = "method/"+id
+        data = {
+            'user': user,
+            'name': name,
+            'titular': titular,
+            'duedate': duedate,
+            'number': number,
+            'type': type,
+            'sucursal': sucursal
+        }
+        url = f"{urlGolang}{route}"
+        response = requests.put(url, json=data)
+        if response.status_code == 200:
+            json = response.json()
+            response = Response(
+                message=json['message'],
+                status=json['status']
+            )
+            return UpdateMethod(ok=True, response=response)
+        else:
+            raise GraphQLError('Hubo un error al realizar la petición')
 # Mutations auth_ms Java Spring
 # Register user credentials
+
+
 class CreateUserAuth(graphene.Mutation):
     class Arguments:
         # id = graphene.String(required=True)
@@ -169,6 +281,8 @@ class CreateUserAuth(graphene.Mutation):
             raise GraphQLError('Hubo un error al realizar la petición')
 
 # Update user credentials
+
+
 class UpdateUserAuth(graphene.Mutation):
     class Arguments:
         # id = graphene.String(required=True)
@@ -198,6 +312,8 @@ class UpdateUserAuth(graphene.Mutation):
             raise GraphQLError('Hubo un error al realizar la petición')
 
 # Delete user credentials
+
+
 class DeleteUserAuth(graphene.Mutation):
     class Arguments:
         # id = graphene.String(required=True)
@@ -217,6 +333,8 @@ class DeleteUserAuth(graphene.Mutation):
             raise GraphQLError('Hubo un error al realizar la petición')
 
 # Authenticate user credentials
+
+
 class AuthenticateUserAuth(graphene.Mutation):
     class Arguments:
         # id = graphene.String(required=True)
@@ -242,8 +360,10 @@ class AuthenticateUserAuth(graphene.Mutation):
         else:
             raise GraphQLError('Hubo un error al realizar la petición')
 
-#Mutations users_ms 
+# Mutations users_ms
 # CreateUser
+
+
 class CreateUser(graphene.Mutation):
     class Arguments:
 
@@ -257,7 +377,7 @@ class CreateUser(graphene.Mutation):
     ok = graphene.Boolean()
     user = graphene.Field(User)
 
-    def mutate(self, info, first_name,last_name,date_birth,role,phone,document_type,document_number ):
+    def mutate(self, info, first_name, last_name, date_birth, role, phone, document_type, document_number):
         data = {
             'first_name': first_name,
             'last_name': last_name,
@@ -286,6 +406,8 @@ class CreateUser(graphene.Mutation):
             raise GraphQLError('Hubo un error al realizar la petición')
 
 # Update user credentials
+
+
 class UpdateUser(graphene.Mutation):
     class Arguments:
         # id = graphene.String(required=True)
@@ -304,12 +426,14 @@ class UpdateUser(graphene.Mutation):
         response = requests.put(url, json=data)
 
         if response.status_code == 200:
-            user = response.json()            
-            return UpdateUser(ok=True,user=user)
+            user = response.json()
+            return UpdateUser(ok=True, user=user)
         else:
             raise GraphQLError('Hubo un error al realizar la petición')
 
 # Delete user credentials
+
+
 class DeleteUser(graphene.Mutation):
     class Arguments:
         # id = graphene.String(required=True)
@@ -326,15 +450,17 @@ class DeleteUser(graphene.Mutation):
             return DeleteUser(ok=True)
         else:
             raise GraphQLError('Hubo un error al realizar la petición')
-        
+
 # Queries Products_ms
+
+
 def getProduct(id):
     route = "Product/"
     response = requests.get(f"{urlProducts}{route}{id}")
     if response.status_code == 200:
         data = response.json()
-        #print(result)
-        #print(result[1]["id"])
+        # print(result)
+        # print(result[1]["id"])
         return Product(
             id=data.get('id'),  # .get evita errores por campo no existente
             userID=data.get('userID'),
@@ -346,9 +472,11 @@ def getProduct(id):
         )
     else:
         return None
-    
+
 # Mutations Products_ms
 # Create Product
+
+
 class CreateProduct(graphene.Mutation):
     class Arguments:
         id = graphene.ID(required=True)
@@ -361,7 +489,7 @@ class CreateProduct(graphene.Mutation):
     ok = graphene.Boolean()
     product = graphene.Field(Product)
 
-    def mutate(self,info, id, userID, kind, ea, amount, installments, dateTime ):
+    def mutate(self, info, id, userID, kind, ea, amount, installments, dateTime):
         route = "Product"
         data = {
             "id": id,
@@ -373,10 +501,9 @@ class CreateProduct(graphene.Mutation):
             "dateTime": dateTime,
         }
 
-        
-        url = f"{urlProducts}{route}"        
+        url = f"{urlProducts}{route}"
         response = requests.post(url, json=data)
-        
+
         if response.status_code == 200:
             product = Product(
                 id,
@@ -390,8 +517,9 @@ class CreateProduct(graphene.Mutation):
             return CreateProduct(ok=True, product=product)
         else:
             raise GraphQLError('Hubo un error al realizar la petición')
-        
-# Update Product 
+
+# Update Product
+
 
 class UpdateProduct(graphene.Mutation):
     class Arguments:
@@ -402,11 +530,11 @@ class UpdateProduct(graphene.Mutation):
         amount = graphene.Int(required=True)
         installments = graphene.Int(required=True)
         dateTime = graphene.String(required=True)
-        
+
     ok = graphene.Boolean()
     product = graphene.Field(Product)
-    
-    def mutate(self,info, id, userID, kind, ea, amount, installments, dateTime ):
+
+    def mutate(self, info, id, userID, kind, ea, amount, installments, dateTime):
         route = "Product"
         data = {
             "id": id,
@@ -417,37 +545,41 @@ class UpdateProduct(graphene.Mutation):
             "installments": installments,
             "dateTime": dateTime,
         }
-        
+
         url = f"{urlProducts}{route}"
-        response = requests.put(url, json=data) 
-        
+        response = requests.put(url, json=data)
+
+        product = response.json()
+        print(product)
         if response.status_code == 200:
-            product = response.json()            
+            product = response.json()
             return UpdateProduct(ok=True, product=product)
         else:
             raise GraphQLError('Hubo un error al realizar la petición')
 
-# Delete Product 
+# Delete Product
+
 
 class DeleteProduct(graphene.Mutation):
     class Arguments:
         id = graphene.ID(required=True)
-        
+
     ok = graphene.Boolean()
-    
+
     def mutate(self, info, id):
-        
+
         route = "Product/"
-        url = f"{urlProducts}{route}{id}"   
-        response = requests.delete(url) 
-        
-        
+        url = f"{urlProducts}{route}{id}"
+        response = requests.delete(url)
+
         if response.status_code == 200:
             return DeleteProduct(ok=True)
         else:
             raise GraphQLError('Hubo un error al realizar la petición')
 
 # Mutations for transactions_ms TypeScript
+
+
 class AddTransaction(graphene.Mutation):
     class Arguments:
         amount = graphene.Float(required=True)
@@ -455,7 +587,7 @@ class AddTransaction(graphene.Mutation):
         description = graphene.String(required=True)
         senderId = graphene.Int(required=True)
         receiverId = graphene.Int(required=True)
-    
+
     transactionId = graphene.Int()
 
     def mutate(self, info, amount, dateTime, description, senderId, receiverId):

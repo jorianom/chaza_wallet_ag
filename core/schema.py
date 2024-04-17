@@ -86,6 +86,9 @@ class Mutation(graphene.ObjectType):
 
     # Microserver Golang
     postRecharge = CreateRecharge.Field()
+    postMethod = CreateMethod.Field()
+    deleteMethod = DeleteMethod.Field()
+    putMethod = UpdateMethod.Field()
 
     # auth_ms Java Spring
     postUserAuth = CreateUserAuth.Field()
