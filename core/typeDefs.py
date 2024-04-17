@@ -1,5 +1,7 @@
 import graphene
-
+import os
+from dotenv import load_dotenv
+load_dotenv()
 ''' 
 # Example
 class Char(graphene.ObjectType):
@@ -10,7 +12,9 @@ class Char(graphene.ObjectType):
 '''
 
 # Microserver Golang
-urlGolang = "http://localhost:5000/api/"
+# "https://go-recharges-ms-yerq2evawq-uc.a.run.app/api/" #"http://localhost:5000/api/"
+urlGolang = os.getenv('URL_GOLANG')
+
 
 class Recharge(graphene.ObjectType):
     id = graphene.String()
@@ -19,6 +23,7 @@ class Recharge(graphene.ObjectType):
     method = graphene.String()
     date = graphene.String()
     status = graphene.String()
+
 
 class Method(graphene.ObjectType):
     id = graphene.ID()
@@ -29,26 +34,32 @@ class Method(graphene.ObjectType):
     number = graphene.String()
     type = graphene.String()
     sucursal = graphene.String()
-    
+
+
 class Response(graphene.ObjectType):
     message = graphene.String()
     status = graphene.String()
     data = graphene.ObjectType()
+
 
 class MethodResponse(graphene.ObjectType):
     id = graphene.ID()
     status = graphene.Int()
     recharge = graphene.ObjectType()
 
+
 # auth_ms Java Spring
 urlAuth = "http://localhost:8080/auth/"
+
 
 class UserAuth(graphene.ObjectType):
     username = graphene.String()
     password = graphene.String()
 
+
 # users_ms python
 urlUsers = "http://localhost:4000/UsersUN/"
+
 
 class User(graphene.ObjectType):
     id = graphene.ID()
@@ -59,9 +70,11 @@ class User(graphene.ObjectType):
     phone = graphene.String()
     document_type = graphene.String()
     document_number = graphene.String()
-    
+
+
 # products_ms c#
 urlProducts = "http://localhost:3000/api/"
+
 
 class Product(graphene.ObjectType):
     id = graphene.ID()
@@ -71,10 +84,11 @@ class Product(graphene.ObjectType):
     amount = graphene.String()
     installments = graphene.String()
     dateTime = graphene.String()
-    
+
 
 # transactions_ms TypeScript
 urlTransactions = "http://localhost:3003"
+
 
 class Transaction(graphene.ObjectType):
     transactionId = graphene.Int()
