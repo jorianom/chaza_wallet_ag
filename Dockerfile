@@ -1,12 +1,20 @@
+# Usar una imagen base de Python
 FROM python:3
-ENV PYTHONUNBUFFERED 1
 
-RUN mkdir /code
-WORKDIR /code
+# Establecer el directorio de trabajo en /app
+WORKDIR /app
 
-COPY requirements.txt /code/
+# Copiar el archivo de requerimientos al contenedor
+COPY requirements.txt .
+
+# Instalar las dependencias
 RUN pip install -r requirements.txt
-COPY . /code/
-ARG URL=0.0.0.0:8000
-EXPOSE 6000
-CMD ["sh", "-c", "python manage.py makemigrations && python manage.py migrate && python manage.py runserver $URL"]
+
+# Copiar el resto del código al contenedor
+COPY . .
+
+# Exponer el puerto 8000
+EXPOSE 8000
+
+# Comando para iniciar la aplicación
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]

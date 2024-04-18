@@ -4,7 +4,7 @@ pip install django\
 pip install graphene-django\
 pip install requests
 python -m pip install pika --upgrade
-
+docker-compose up -d
 ## start -> python manage.py runserver
 ## [python manage.py runserver] (http://127.0.0.1:/graphql)
 ## examples:
