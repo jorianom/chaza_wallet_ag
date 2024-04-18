@@ -25,7 +25,11 @@ SECRET_KEY = 'django-insecure-+3m6m9bfs3*5^76wd=^m%5(89z8lpne8m$5gq+2gqep24^u__y
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(',')
+#ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(',') 
+ALLOWED_HOSTS = [
+    'chaza-wallet-ag-ithgocyoua-uc.a.run.app'
+]
+
 
 
 # Application definition
