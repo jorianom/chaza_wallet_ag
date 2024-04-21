@@ -97,3 +97,5 @@ class Transaction(graphene.ObjectType):
     description = graphene.String()
     senderId = graphene.Int()
     receiverId = graphene.Int()
+    senderPhone = graphene.String()
+    receiverPhone = graphene.String()
