@@ -104,6 +104,43 @@ def getTransactionsForUserResolve(id):
     else:
         return None
 
+def checkPhone(phone):
+    response = requests.get(f"{urlUsers}byphone/{phone}")
+    if response.status_code == 200:
+         data = response.json()
+         return User(
+            id=data.get('id'),
+            first_name=data.get('first_name'),
+            last_name=data.get('last_name'),
+            role=data.get('role'),
+            date_birth=data.get('date_birth'),
+            phone=data.get('phone'),
+            document_type=data.get('document_type'),
+            document_number=data.get('document_number')
+        )
+    else:
+        return None
+
+def calculateBalanceForUser(id):
+    balance = 0
+    try:
+        transactions = getTransactionsForUserResolve(id)
+        for transaction in transactions:
+            if str(transaction['senderId']) == str(id):
+                balance -= transaction['amount']
+            if str(transaction['receiverId']) == str(id):
+                balance += transaction['amount']
+    except:
+        pass
+    try:
+        recharges = getRechargesResolve(id)
+        for recharge in recharges:
+            balance += float(recharge.amount)
+    except:
+        pass
+    return balance
+
+
 # Mutations Microserver Golang
 
 
@@ -587,20 +624,35 @@ class AddTransaction(graphene.Mutation):
         amount = graphene.Float(required=True)
         dateTime = graphene.String(required=True)
         description = graphene.String(required=True)
-        senderId = graphene.Int(required=True)
-        receiverId = graphene.Int(required=True)
+        senderPhone = graphene.String(required=True)
+        receiverPhone = graphene.String(required=True)
 
     transactionId = graphene.Int()
 
-    def mutate(self, info, amount, dateTime, description, senderId, receiverId):
+    def mutate(self, info, amount, dateTime, description, senderPhone, receiverPhone):
+
+        sender_check = checkPhone(senderPhone)
+        if sender_check is None:
+            raise GraphQLError(f'Sender with phone number {senderPhone} does not exist')
+        
+        receiver_check = checkPhone(receiverPhone)
+        if receiver_check is None:
+            raise GraphQLError(f'Receiver with phone number {receiverPhone} does not exist')
+        
+        sender_balance = calculateBalanceForUser(sender_check.id)
+        print(sender_balance)
+
+        if sender_balance < amount:
+            raise GraphQLError('Sender does not have enough balance for this transaction')
+        
         response = requests.post(
             f"{urlTransactions}/transactions",
             json={
                 "amount": amount,
                 "dateTime": dateTime,
                 "description": description,
-                "senderId": senderId,
-                "receiverId": receiverId
+                "senderId": sender_check.id,
+                "receiverId": receiver_check.id
             }
         )
         if response.status_code == 200:

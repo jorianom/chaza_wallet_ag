@@ -45,6 +45,16 @@ class Query(graphene.ObjectType):
 
     def resolve_getTransactionsForUser(self, info, id):
         return getTransactionsForUserResolve(id)
+    
+    checkPhone = graphene.Field(User, phone=graphene.String())
+
+    def resolve_checkPhone(self, info, phone):
+        return checkPhone(phone)
+    
+    calculateBalanceForUser = graphene.Float(id=graphene.ID(required=True))
+
+    def resolve_calculateBalanceForUser(self, info, id):
+        return calculateBalanceForUser(id)
 
 
     ''' # Examples
