@@ -29,6 +29,7 @@ DEBUG = True
 ALLOWED_HOSTS = [
     'chaza-wallet-ag-ithgocyoua-uc.a.run.app',
     '127.0.0.1',
+    '0.0.0.0',
     '10.0.2.2',
     'http://localhost:9000'
 ]

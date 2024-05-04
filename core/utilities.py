@@ -636,13 +636,12 @@ class AddTransaction(graphene.Mutation):
 
         sender_check = checkPhone(senderPhone)
         if sender_check is None:
-            raise GraphQLError(f'Sender with phone number {
-                               senderPhone} does not exist')
+            raise GraphQLError(f'Sender with phone number {senderPhone} does not exist')
+
 
         receiver_check = checkPhone(receiverPhone)
         if receiver_check is None:
-            raise GraphQLError(f'Receiver with phone number {
-                               receiverPhone} does not exist')
+            raise GraphQLError(f'Receiver with phone number {receiverPhone} does not exist')
 
         sender_balance = calculateBalanceForUser(sender_check.id, senderPhone)
         print(sender_balance)

@@ -13,6 +13,8 @@ class Char(graphene.ObjectType):
 
 # Microserver Golang
 # "https://go-recharges-ms-yerq2evawq-uc.a.run.app/api/" #"http://localhost:5000/api/"
+# os.getenv('URL_GOLANG')
+# "https://go-recharges-ms-yerq2evawq-uc.a.run.app/api/"
 urlGolang = os.getenv('URL_GOLANG')
 
 
