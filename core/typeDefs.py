@@ -73,7 +73,7 @@ class User(graphene.ObjectType):
 
 
 # products_ms c#
-urlProducts = "http://localhost:3000/api/"
+urlProducts = "http://localhost:3030/api/"
 
 
 class Product(graphene.ObjectType):

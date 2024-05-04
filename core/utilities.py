@@ -104,11 +104,12 @@ def getTransactionsForUserResolve(id):
     else:
         return None
 
+
 def checkPhone(phone):
     response = requests.get(f"{urlUsers}byphone/{phone}")
     if response.status_code == 200:
-         data = response.json()
-         return User(
+        data = response.json()
+        return User(
             id=data.get('id'),
             first_name=data.get('first_name'),
             last_name=data.get('last_name'),
@@ -121,7 +122,8 @@ def checkPhone(phone):
     else:
         return None
 
-def calculateBalanceForUser(id):
+
+def calculateBalanceForUser(id, senderPhone):
     balance = 0
     try:
         transactions = getTransactionsForUserResolve(id)
@@ -133,7 +135,7 @@ def calculateBalanceForUser(id):
     except:
         pass
     try:
-        recharges = getRechargesResolve(id)
+        recharges = getRechargesResolve(senderPhone)
         for recharge in recharges:
             balance += float(recharge.amount)
     except:
@@ -153,12 +155,12 @@ class CreateRecharge(graphene.Mutation):
         date = graphene.String(required=True)
         status = graphene.String()
     ok = graphene.Boolean()
-    response = graphene.Field(Response)
+    recharge = graphene.Field(Recharge)
 
     def mutate(self, info, user, amount, method, date):
         route = "recharge"
-        producer = Producer()
-        producer.connect("recharges")
+        # producer = Producer()
+        # producer.connect("recharges")
         data = {
             'user': user,
             'amount': amount,
@@ -167,28 +169,29 @@ class CreateRecharge(graphene.Mutation):
             'status': 'pending'
         }
 
-        request_json = json.dumps(data)
+        # request_json = json.dumps(data)
         url = f"{urlGolang}{route}"
-        producer.publish(request_json)
-        response = Response(
-            message="Recarga en proceso ..."
-        )
-        return CreateRecharge(ok=True, response=response)
-        # response = requests.post(url, json=data)
-        # if response.status_code == 200:
-        #     data = response.json().get("recharge")
+        # producer.publish(request_json)
+        # response = Response(
+        #     message="Recarga en proceso ..."
+        # )
+        # return CreateRecharge(ok=True, response=response)
+        response = requests.post(url, json=data)
+        if response.status_code == 200:
+            data = response.json().get("recharge")
 
-        #     recharge = Recharge(
-        #         id=data['id'],
-        #         user=data['user'],
-        #         amount=data['amount'],
-        #         method=data['method'],
-        #         date=data['date'],
-        #         status=data['status']
-        #     )
-        #     return CreateRecharge(ok=True, recharge=recharge)
-        # else:
-        #     raise GraphQLError('Hubo un error al realizar la petición')
+            print(data)
+            recharge = Recharge(
+                id=data['id'],
+                user=data['user'],
+                amount=data['amount'],
+                method=data['method'],
+                date=data['date'],
+                status=data['status']
+            )
+            return CreateRecharge(ok=True, recharge=recharge)
+        else:
+            raise GraphQLError('Hubo un error al realizar la petición')
 
 
 class CreateMethod(graphene.Mutation):
@@ -633,18 +636,21 @@ class AddTransaction(graphene.Mutation):
 
         sender_check = checkPhone(senderPhone)
         if sender_check is None:
-            raise GraphQLError(f'Sender with phone number {senderPhone} does not exist')
-        
+            raise GraphQLError(f'Sender with phone number {
+                               senderPhone} does not exist')
+
         receiver_check = checkPhone(receiverPhone)
         if receiver_check is None:
-            raise GraphQLError(f'Receiver with phone number {receiverPhone} does not exist')
-        
-        sender_balance = calculateBalanceForUser(sender_check.id)
+            raise GraphQLError(f'Receiver with phone number {
+                               receiverPhone} does not exist')
+
+        sender_balance = calculateBalanceForUser(sender_check.id, senderPhone)
         print(sender_balance)
 
         if sender_balance < amount:
-            raise GraphQLError('Sender does not have enough balance for this transaction')
-        
+            raise GraphQLError(
+                'Sender does not have enough balance for this transaction')
+
         response = requests.post(
             f"{urlTransactions}/transactions",
             json={
