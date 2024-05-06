@@ -3,6 +3,8 @@ import os
 import jwt
 from graphql import GraphQLError
 from dotenv import load_dotenv
+import base64
+
 load_dotenv()
 ''' 
 # Example
@@ -76,13 +78,15 @@ def validate_authorization(info, secret):
     if len(parts) != 2 or parts[0].lower() != 'bearer':
         raise GraphQLError('Error: formato de header de autorización inválido')
     token = parts[1]
-    token = token.strip()
     # DEBUG
-    print("JWT: ", token)
+    print("JWT:", token)
+
+    # Decodificar secreto
+    decoded_secret = base64.b64decode(secret)
 
     # Validar token
     try:
-        decoded_payload = jwt.decode(token, secret, algorithms=['HS512'])
+        decoded_payload = jwt.decode(token, decoded_secret, algorithms=['HS512'])
     except jwt.ExpiredSignatureError:
         raise GraphQLError('Error: el token ha expirado')
     except jwt.InvalidTokenError:
