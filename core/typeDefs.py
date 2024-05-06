@@ -53,7 +53,8 @@ class MethodResponse(graphene.ObjectType):
 
 
 # auth_ms Java Spring
-urlAuth = "http://localhost:8080/auth/"
+# urlAuth = "http://localhost:8080/auth/"
+urlAuth = os.getenv('URL_AUTH')
 
 class UserAuth(graphene.ObjectType):
     username = graphene.String()
@@ -88,7 +89,8 @@ def validate_authorization(info, secret):
         raise GraphQLError("Error: el token es inválido")
 
 # users_ms python
-urlUsers = "http://localhost:4000/UsersUN/"
+# urlUsers = "http://localhost:4000/UsersUN/"
+urlUsers = os.getenv('URL_USERS')
 
 
 class User(graphene.ObjectType):
@@ -103,7 +105,8 @@ class User(graphene.ObjectType):
 
 
 # products_ms c#
-urlProducts = "http://localhost:3030/api/"
+# urlProducts = "http://localhost:3030/api/"
+urlProducts = os.getenv('URL_PRODUCTS')
 
 
 class Product(graphene.ObjectType):
@@ -117,7 +120,8 @@ class Product(graphene.ObjectType):
 
 
 # transactions_ms TypeScript
-urlTransactions = "http://localhost:3003"
+# urlTransactions = "http://localhost:3003"
+urlTransactions = os.getenv('URL_TRANSACTIONS')
 
 
 class Transaction(graphene.ObjectType):
