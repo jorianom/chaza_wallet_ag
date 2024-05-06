@@ -76,7 +76,7 @@ def validate_authorization(info, secret):
     if len(parts) != 2 or parts[0].lower() != 'bearer':
         raise GraphQLError('Error: formato de header de autorización inválido')
     token = parts[1]
-    
+    token = token.strip()
     # DEBUG
     print("JWT: ", token)
 
