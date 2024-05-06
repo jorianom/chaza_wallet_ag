@@ -111,9 +111,7 @@ class Mutation(graphene.ObjectType):
     putMethod = UpdateMethod.Field()
 
     # auth_ms Java Spring
-    postUserAuth = CreateUserAuth.Field()
     updateUserAuth = UpdateUserAuth.Field()
-    deleteUserAuth = DeleteUserAuth.Field()
     authenticateUserAuth = AuthenticateUserAuth.Field()
 
     # users_ms python Django

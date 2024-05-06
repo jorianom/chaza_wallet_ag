@@ -323,23 +323,62 @@ class UpdateMethod(graphene.Mutation):
             return UpdateMethod(ok=True, response=response)
         else:
             raise GraphQLError('Hubo un error al realizar la petición')
-# Mutations auth_ms Java Spring
-# Register user credentials
 
 
-class CreateUserAuth(graphene.Mutation):
+# Mutations users_ms and auth_ms
+# CreateUser
+
+class CreateUser(graphene.Mutation):
     class Arguments:
-        # id = graphene.String(required=True)
+
+        first_name = graphene.String(required=True)
+        last_name = graphene.String(required=True)
+        date_birth = graphene.String(required=True)
+        role = graphene.String(required=True)
+        phone = graphene.String(required=True)
+        document_type = graphene.String(required=True)
+        document_number = graphene.String(required=True)
         username = graphene.String(required=True)
         password = graphene.String(required=True)
-
     ok = graphene.Boolean()
-    userAuth = graphene.Field(UserAuth)
+    user = graphene.Field(User)
 
-    def mutate(self, info, username, password):
+    def mutate(self, info, first_name, last_name, date_birth, role, phone, document_type, document_number, username, password):
+
+        # Crear usuario en users_ms
+        data = {
+            'first_name': first_name,
+            'last_name': last_name,
+            'role': role,
+            'date_birth': date_birth,
+            'phone': phone,
+            'document_type': document_type,
+            'document_number': document_number
+        }
+
+        url = f"{urlUsers}"
+        response = requests.post(url, json=data)
+
+        if response.status_code == 201:
+            user = User(
+                first_name,
+                last_name,
+                role,
+                date_birth,
+                phone,
+                document_type,
+                document_number
+            )
+        else:
+            raise GraphQLError('Hubo un error al realizar la petición')
+
+        # Crear usuario en auth_ms
+        userId = 
+
         data = {
             'username': username,
-            'password': password
+            'password': password,
+            'userId': userId
         }
 
         route = "register"
@@ -347,16 +386,41 @@ class CreateUserAuth(graphene.Mutation):
         response = requests.post(url, json=data)
 
         if response.status_code == 200:
-            userAuth = UserAuth(
-                username,
-                password
-            )
-            return CreateUserAuth(ok=True, userAuth=userAuth)
+            return CreateUser(ok=True, user=user)
         else:
             raise GraphQLError('Hubo un error al realizar la petición')
 
-# Update user credentials
 
+# Update user info
+
+class UpdateUser(graphene.Mutation):
+    class Arguments:
+        # id = graphene.String(required=True)
+        id = graphene.ID(required=True)
+        userProperty = graphene.String(required=True)
+
+    ok = graphene.Boolean()
+    user = graphene.Field(User)
+
+    def mutate(self, info, id, userProperty):
+        data = {
+            'phone': userProperty
+        }
+
+        # Validación de la autorización
+        validate_authorization(info, secret)
+
+        url = f"{urlUsers}{id}"
+        response = requests.put(url, json=data)
+
+        if response.status_code == 200:
+            user = response.json()
+            return UpdateUser(ok=True, user=user)
+        else:
+            raise GraphQLError('Hubo un error al realizar la petición')
+
+
+# Update user credentials
 
 class UpdateUserAuth(graphene.Mutation):
     class Arguments:
@@ -389,32 +453,43 @@ class UpdateUserAuth(graphene.Mutation):
         else:
             raise GraphQLError('Hubo un error al realizar la petición')
 
-# Delete user credentials
 
+# Delete user
 
-class DeleteUserAuth(graphene.Mutation):
+class DeleteUser(graphene.Mutation):
     class Arguments:
         # id = graphene.String(required=True)
-        username = graphene.String(required=True)
+        id = graphene.ID(required=True)
 
     ok = graphene.Boolean()
 
-    def mutate(self, info, username):
+    def mutate(self, info, id):
 
         # Validación de la autorización
         validate_authorization(info, secret)
 
+        # Borrar de users_ms
+        url = f"{urlUsers}{id}"
+        response = requests.delete(url)
+
+        if response.status_code == 204:
+            pass
+        else:
+            raise GraphQLError('Hubo un error al realizar la petición')
+        
+        # Borrar de auth_ms
         route = "delete/"
-        url = f"{urlAuth}{route}{username}"
+        url = f"{urlAuth}{route}{id}"
         response = requests.delete(url)
 
         if response.status_code == 200:
-            return DeleteUserAuth(ok=True)
+            return DeleteUser(ok=True)
         else:
             raise GraphQLError('Hubo un error al realizar la petición')
 
-# Authenticate user credentials
 
+# Mutations auth_ms Java Spring
+# Authenticate user credentials
 
 class AuthenticateUserAuth(graphene.Mutation):
     class Arguments:
@@ -443,105 +518,6 @@ class AuthenticateUserAuth(graphene.Mutation):
         else:
             raise GraphQLError('Hubo un error al realizar la petición')
 
-# Mutations users_ms
-# CreateUser
-
-
-class CreateUser(graphene.Mutation):
-    class Arguments:
-
-        first_name = graphene.String(required=True)
-        last_name = graphene.String(required=True)
-        date_birth = graphene.String(required=True)
-        role = graphene.String(required=True)
-        phone = graphene.String(required=True)
-        document_type = graphene.String(required=True)
-        document_number = graphene.String(required=True)
-    ok = graphene.Boolean()
-    user = graphene.Field(User)
-
-    def mutate(self, info, first_name, last_name, date_birth, role, phone, document_type, document_number):
-        data = {
-            'first_name': first_name,
-            'last_name': last_name,
-            'role': role,
-            'date_birth': date_birth,
-            'phone': phone,
-            'document_type': document_type,
-            'document_number': document_number
-        }
-
-        # Validación de la autorización
-        validate_authorization(info, secret)
-
-        url = f"{urlUsers}"
-        response = requests.post(url, json=data)
-
-        if response.status_code == 201:
-            user = User(
-                first_name,
-                last_name,
-                role,
-                date_birth,
-                phone,
-                document_type,
-                document_number
-            )
-            return CreateUser(ok=True, user=user)
-        else:
-            raise GraphQLError('Hubo un error al realizar la petición')
-
-# Update user credentials
-
-
-class UpdateUser(graphene.Mutation):
-    class Arguments:
-        # id = graphene.String(required=True)
-        id = graphene.ID(required=True)
-        userProperty = graphene.String(required=True)
-
-    ok = graphene.Boolean()
-    user = graphene.Field(User)
-
-    def mutate(self, info, id, userProperty):
-        data = {
-            'phone': userProperty
-        }
-
-        # Validación de la autorización
-        validate_authorization(info, secret)
-
-        url = f"{urlUsers}{id}"
-        response = requests.put(url, json=data)
-
-        if response.status_code == 200:
-            user = response.json()
-            return UpdateUser(ok=True, user=user)
-        else:
-            raise GraphQLError('Hubo un error al realizar la petición')
-
-# Delete user credentials
-
-
-class DeleteUser(graphene.Mutation):
-    class Arguments:
-        # id = graphene.String(required=True)
-        id = graphene.ID(required=True)
-
-    ok = graphene.Boolean()
-
-    def mutate(self, info, id):
-
-        # Validación de la autorización
-        validate_authorization(info, secret)
-
-        url = f"{urlUsers}{id}"
-        response = requests.delete(url)
-
-        if response.status_code == 204:
-            return DeleteUser(ok=True)
-        else:
-            raise GraphQLError('Hubo un error al realizar la petición')
 
 # Mutations Products_ms
 # Create Product
