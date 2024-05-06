@@ -1,5 +1,7 @@
 import graphene
 import os
+import jwt
+from graphql import GraphQLError
 from dotenv import load_dotenv
 load_dotenv()
 ''' 
@@ -53,11 +55,37 @@ class MethodResponse(graphene.ObjectType):
 # auth_ms Java Spring
 urlAuth = "http://localhost:8080/auth/"
 
-
 class UserAuth(graphene.ObjectType):
     username = graphene.String()
     password = graphene.String()
 
+secret = "G6qmQ3F1EIjaoafKpnw6wFvaK69MzoZVVIhk4Ex5qqSRO7fVAxnzpXW7FOi9tRIKhqFunQyMZjeuZRFxbJegGg=="
+
+def validate_authorization(info, secret):
+    # Extraer request
+    request = info.context
+        
+    # Extraer authorization header
+    authorization_header = request.headers.get('Authorization')
+    if not authorization_header:
+        raise GraphQLError('Error: header de autorización no fue suministrado')
+    
+    # Extraer token
+    parts = authorization_header.split()
+    if len(parts) != 2 or parts[0].lower() != 'bearer':
+        raise GraphQLError('Error: formato de header de autorización inválido')
+    token = parts[1]
+    
+    # DEBUG
+    print("JWT: ", token)
+
+    # Validar token
+    try:
+        decoded_payload = jwt.decode(token, secret, algorithms=['HS512'])
+    except jwt.ExpiredSignatureError:
+        raise GraphQLError('Error: el token ha expirado')
+    except jwt.InvalidTokenError:
+        raise GraphQLError("Error: el token es inválido")
 
 # users_ms python
 urlUsers = "http://localhost:4000/UsersUN/"
