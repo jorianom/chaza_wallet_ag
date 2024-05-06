@@ -12,11 +12,11 @@ class Query(graphene.ObjectType):
     getMethods = graphene.List(Method, id=graphene.ID())
 
     def resolve_getRecharges(self, info, id):
-        validate_authorization(info, secret, id)
+        validate_authorization(info, secret)
         return getRechargesResolve(id)
 
     def resolve_getMethods(self, info, id):
-        validate_authorization(info, secret, id)
+        validate_authorization(info, secret)
         return getMethodsResolve(id)
 
     # Users python
@@ -25,11 +25,11 @@ class Query(graphene.ObjectType):
     getUsers = graphene.List(User)
 
     def resolve_getUser(self,info,id):
-        validate_authorization(info, secret, id)
+        validate_authorization(info, secret)
         return getUser(id)
     
     def resolve_getUsers(self,info):
-        validate_authorization(info, secret, id)
+        validate_authorization(info, secret)
         return getUsers()
     
 
@@ -38,32 +38,32 @@ class Query(graphene.ObjectType):
     getProduct = graphene.Field(Product,id=graphene.ID())
     
     def resolve_getProduct(self, info, id):
-        validate_authorization(info, secret, id)
+        validate_authorization(info, secret)
         return getProduct(id)
 
     # Transactions
     getTransactions = graphene.List(Transaction)
 
     def resolve_getTransactions(self, info):
-        validate_authorization(info, secret, id)
+        validate_authorization(info, secret)
         return getTransactionsResolve()
     
     getTransactionsForUser = graphene.List(Transaction, id=graphene.Int())
 
     def resolve_getTransactionsForUser(self, info, id):
-        validate_authorization(info, secret, id)
+        validate_authorization(info, secret)
         return getTransactionsForUserResolve(id)
     
     checkPhone = graphene.Field(User, phone=graphene.String())
 
     def resolve_checkPhone(self, info, phone):
-        validate_authorization(info, secret, id)
+        validate_authorization(info, secret)
         return checkPhone(phone)
     
     calculateBalanceForUser = graphene.Float(id=graphene.ID(required=True))
 
     def resolve_calculateBalanceForUser(self, info, id):
-        validate_authorization(info, secret, id)
+        validate_authorization(info, secret)
         return calculateBalanceForUser(id)
 
 
