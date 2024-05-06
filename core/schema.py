@@ -3,6 +3,7 @@ import requests
 
 from core.typeDefs import *
 from core.utilities import *
+from graphql import GraphQLError
 
 class Query(graphene.ObjectType):
 
@@ -11,9 +12,11 @@ class Query(graphene.ObjectType):
     getMethods = graphene.List(Method, id=graphene.ID())
 
     def resolve_getRecharges(self, info, id):
+        validate_authorization(info, secret, id)
         return getRechargesResolve(id)
 
     def resolve_getMethods(self, info, id):
+        validate_authorization(info, secret, id)
         return getMethodsResolve(id)
 
     # Users python
@@ -22,9 +25,11 @@ class Query(graphene.ObjectType):
     getUsers = graphene.List(User)
 
     def resolve_getUser(self,info,id):
+        validate_authorization(info, secret, id)
         return getUser(id)
     
     def resolve_getUsers(self,info):
+        validate_authorization(info, secret, id)
         return getUsers()
     
 
@@ -33,27 +38,32 @@ class Query(graphene.ObjectType):
     getProduct = graphene.Field(Product,id=graphene.ID())
     
     def resolve_getProduct(self, info, id):
+        validate_authorization(info, secret, id)
         return getProduct(id)
 
     # Transactions
     getTransactions = graphene.List(Transaction)
 
     def resolve_getTransactions(self, info):
+        validate_authorization(info, secret, id)
         return getTransactionsResolve()
     
     getTransactionsForUser = graphene.List(Transaction, id=graphene.Int())
 
     def resolve_getTransactionsForUser(self, info, id):
+        validate_authorization(info, secret, id)
         return getTransactionsForUserResolve(id)
     
     checkPhone = graphene.Field(User, phone=graphene.String())
 
     def resolve_checkPhone(self, info, phone):
+        validate_authorization(info, secret, id)
         return checkPhone(phone)
     
     calculateBalanceForUser = graphene.Float(id=graphene.ID(required=True))
 
     def resolve_calculateBalanceForUser(self, info, id):
+        validate_authorization(info, secret, id)
         return calculateBalanceForUser(id)
 
 
@@ -117,7 +127,6 @@ class Mutation(graphene.ObjectType):
     postProduct = CreateProduct.Field()
     updateProduct = UpdateProduct.Field()
     deleteProduct = DeleteProduct.Field()
-    
 
     # transactions_ms TypeScript
     addTransaction = AddTransaction.Field()

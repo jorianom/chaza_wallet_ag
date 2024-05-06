@@ -2,6 +2,7 @@ import json
 import graphene
 from graphql import GraphQLError
 from core.producer import Producer
+from core.typeDefs import secret
 import requests
 
 from core.typeDefs import *
@@ -42,6 +43,28 @@ def getMethodsResolve(id):
             type=data.get('type'),
             sucursal=data.get('sucursal')
         )for data in result]
+    else:
+        return None
+
+# Queries Products_ms
+
+
+def getProduct(id):
+    route = "Product/"
+    response = requests.get(f"{urlProducts}{route}{id}")
+    if response.status_code == 200:
+        data = response.json()
+        # print(result)
+        # print(result[1]["id"])
+        return Product(
+            id=data.get('id'),  # .get evita errores por campo no existente
+            userID=data.get('userID'),
+            kind=data.get('kind'),
+            ea=data.get('ea'),
+            amount=data.get('amount'),
+            installments=data.get('installments'),
+            dateTime=data.get('dateTime')
+        )
     else:
         return None
 
@@ -144,8 +167,6 @@ def calculateBalanceForUser(id, senderPhone):
 
 
 # Mutations Microserver Golang
-
-
 class CreateRecharge(graphene.Mutation):
     class Arguments:
         # id = graphene.String(required=True)
@@ -168,6 +189,9 @@ class CreateRecharge(graphene.Mutation):
             'date': date,
             'status': 'pending'
         }
+
+        # Validación de la autorización
+        validate_authorization(info, secret)
 
         # request_json = json.dumps(data)
         url = f"{urlGolang}{route}"
@@ -217,6 +241,10 @@ class CreateMethod(graphene.Mutation):
             'type': type,
             'sucursal': sucursal
         }
+
+        # Validación de la autorización
+        validate_authorization(info, secret)
+
         url = f"{urlGolang}{route}"
         response = requests.post(url, json=data)
         if response.status_code == 200:
@@ -238,6 +266,9 @@ class DeleteMethod(graphene.Mutation):
 
     def mutate(self, info, id):
         route = "method/"+id
+
+        # Validación de la autorización
+        validate_authorization(info, secret)
 
         url = f"{urlGolang}{route}"
         response = requests.delete(url)
@@ -277,6 +308,10 @@ class UpdateMethod(graphene.Mutation):
             'type': type,
             'sucursal': sucursal
         }
+
+        # Validación de la autorización
+        validate_authorization(info, secret)
+
         url = f"{urlGolang}{route}"
         response = requests.put(url, json=data)
         if response.status_code == 200:
@@ -338,6 +373,9 @@ class UpdateUserAuth(graphene.Mutation):
             'password': password
         }
 
+        # Validación de la autorización
+        validate_authorization(info, secret)
+
         route = "update/"
         url = f"{urlAuth}{route}{username}"
         response = requests.put(url, json=data)
@@ -362,6 +400,9 @@ class DeleteUserAuth(graphene.Mutation):
     ok = graphene.Boolean()
 
     def mutate(self, info, username):
+
+        # Validación de la autorización
+        validate_authorization(info, secret)
 
         route = "delete/"
         url = f"{urlAuth}{route}{username}"
@@ -430,6 +471,9 @@ class CreateUser(graphene.Mutation):
             'document_number': document_number
         }
 
+        # Validación de la autorización
+        validate_authorization(info, secret)
+
         url = f"{urlUsers}"
         response = requests.post(url, json=data)
 
@@ -464,6 +508,9 @@ class UpdateUser(graphene.Mutation):
             'phone': userProperty
         }
 
+        # Validación de la autorización
+        validate_authorization(info, secret)
+
         url = f"{urlUsers}{id}"
         response = requests.put(url, json=data)
 
@@ -485,6 +532,9 @@ class DeleteUser(graphene.Mutation):
 
     def mutate(self, info, id):
 
+        # Validación de la autorización
+        validate_authorization(info, secret)
+
         url = f"{urlUsers}{id}"
         response = requests.delete(url)
 
@@ -493,31 +543,8 @@ class DeleteUser(graphene.Mutation):
         else:
             raise GraphQLError('Hubo un error al realizar la petición')
 
-# Queries Products_ms
-
-
-def getProduct(id):
-    route = "Product/"
-    response = requests.get(f"{urlProducts}{route}{id}")
-    if response.status_code == 200:
-        data = response.json()
-        # print(result)
-        # print(result[1]["id"])
-        return Product(
-            id=data.get('id'),  # .get evita errores por campo no existente
-            userID=data.get('userID'),
-            kind=data.get('kind'),
-            ea=data.get('ea'),
-            amount=data.get('amount'),
-            installments=data.get('installments'),
-            dateTime=data.get('dateTime')
-        )
-    else:
-        return None
-
 # Mutations Products_ms
 # Create Product
-
 
 class CreateProduct(graphene.Mutation):
     class Arguments:
@@ -542,6 +569,9 @@ class CreateProduct(graphene.Mutation):
             "installments": installments,
             "dateTime": dateTime,
         }
+
+        # Validación de la autorización
+        validate_authorization(info, secret)
 
         url = f"{urlProducts}{route}"
         response = requests.post(url, json=data)
@@ -588,6 +618,9 @@ class UpdateProduct(graphene.Mutation):
             "dateTime": dateTime,
         }
 
+        # Validación de la autorización
+        validate_authorization(info, secret)
+
         url = f"{urlProducts}{route}"
         response = requests.put(url, json=data)
 
@@ -609,6 +642,9 @@ class DeleteProduct(graphene.Mutation):
     ok = graphene.Boolean()
 
     def mutate(self, info, id):
+
+        # Validación de la autorización
+        validate_authorization(info, secret)
 
         route = "Product/"
         url = f"{urlProducts}{route}{id}"
@@ -634,10 +670,12 @@ class AddTransaction(graphene.Mutation):
 
     def mutate(self, info, amount, dateTime, description, senderPhone, receiverPhone):
 
+        # Validación de la autorización
+        validate_authorization(info, secret)
+
         sender_check = checkPhone(senderPhone)
         if sender_check is None:
             raise GraphQLError(f'Sender with phone number {senderPhone} does not exist')
-
 
         receiver_check = checkPhone(receiverPhone)
         if receiver_check is None:
