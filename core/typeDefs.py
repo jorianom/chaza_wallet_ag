@@ -61,13 +61,14 @@ urlAuth = os.getenv('URL_AUTH')
 class UserAuth(graphene.ObjectType):
     username = graphene.String()
     password = graphene.String()
+    userId = graphene.Int()
 
 secret = "G6qmQ3F1EIjaoafKpnw6wFvaK69MzoZVVIhk4Ex5qqSRO7fVAxnzpXW7FOi9tRIKhqFunQyMZjeuZRFxbJegGg=="
 
 def validate_authorization(info, secret):
     # Extraer request
     request = info.context
-        
+    
     # Extraer authorization header
     authorization_header = request.headers.get('Authorization')
     if not authorization_header:
