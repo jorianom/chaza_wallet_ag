@@ -3,12 +3,13 @@ import graphene
 from graphql import GraphQLError
 from core.producer import Producer
 from core.typeDefs import secret
+from core.ldap import *
 import requests
 
 from core.typeDefs import *
 
-# Queries Microserver Golang
 
+# Queries Microserver Golang
 
 def getRechargesResolve(id):
     route = "recharges/"
@@ -46,8 +47,8 @@ def getMethodsResolve(id):
     else:
         return None
 
-# Queries Products_ms
 
+# Queries Products_ms
 
 def getProduct(id):
     route = "Product/"
@@ -68,8 +69,8 @@ def getProduct(id):
     else:
         return None
 
-# Queries for User_ms python
 
+# Queries for User_ms python
 
 def getUser(id):
     response = requests.get(f"{urlUsers}{id}")
@@ -109,8 +110,8 @@ def getUsers():
     else:
         return None
 
-# Queries for transactions_ms TypeScript
 
+# Queries for transactions_ms TypeScript
 
 def getTransactionsResolve():
     response = requests.get(f"{urlTransactions}/transactions")
@@ -167,6 +168,7 @@ def calculateBalanceForUser(id):
 
 
 # Mutations Microserver Golang
+
 class CreateRecharge(graphene.Mutation):
     class Arguments:
         # id = graphene.String(required=True)
@@ -325,7 +327,7 @@ class UpdateMethod(graphene.Mutation):
             raise GraphQLError('Hubo un error al realizar la petición')
 
 
-# Mutations users_ms and auth_ms
+# Mutations users_ms, auth_ms y ldap
 # CreateUser
 
 class CreateUser(graphene.Mutation):
@@ -387,6 +389,10 @@ class CreateUser(graphene.Mutation):
         response = requests.post(url, json=data)
         if response.status_code == 200:
             print(response.status_code)
+
+            # Crear usuario en LDAP
+            ldap_create(conn, base_dn, username, password)
+
             return CreateUser(ok=True, user=user)
         if response.status_code == 400:
             print(response.status_code)
@@ -423,7 +429,7 @@ class UpdateUser(graphene.Mutation):
             raise GraphQLError('Hubo un error al realizar la petición')
 
 
-# Update user credentials
+# Update user password
 
 class UpdateUserAuth(graphene.Mutation):
     class Arguments:
@@ -452,6 +458,10 @@ class UpdateUserAuth(graphene.Mutation):
                 username,
                 password
             )
+
+            # Cambiar contraseña en LDAP
+            ldap_update(conn, base_dn, username, password)
+
             return UpdateUserAuth(ok=True, userAuth=userAuth)
         else:
             raise GraphQLError('Hubo un error al realizar la petición')
@@ -487,6 +497,18 @@ class DeleteUser(graphene.Mutation):
         response = requests.delete(url)
         print(response.status_code)
         if response.status_code == 200:
+
+            # Borrar de LDAP
+            request = info.context
+            authorization_header = request.headers.get('Authorization')
+            parts = authorization_header.split()
+            token = parts[1]
+            decoded_secret = base64.b64decode(secret)
+            decoded_payload = jwt.decode(token, decoded_secret, algorithms=['HS512'])
+            username = decoded_payload['sub']
+
+            ldap_delete(conn, base_dn, username)
+
             return DeleteUser(ok=True)
         if response.status_code == 400:
             return DeleteUser(ok=True)
@@ -511,7 +533,12 @@ class AuthenticateUserAuth(graphene.Mutation):
             'username': username,
             'password': password
         }
+        
+        # Autenticar en ldap
+        if not ldap_authenticate(base_dn, username, password):
+            raise GraphQLError('Usuario o contraseña incorrectos')
 
+        # Autenticar en auth_ms
         route = "authenticate"
         url = f"{urlAuth}{route}"
         response = requests.post(url, json=data)
