@@ -1,9 +1,7 @@
 import graphene
 import requests
-
 from core.typeDefs import *
 from core.utilities import *
-from graphql import GraphQLError
 
 class Query(graphene.ObjectType):
 
@@ -115,13 +113,11 @@ class Mutation(graphene.ObjectType):
     authenticateUserAuth = AuthenticateUserAuth.Field()
 
     # users_ms python Django
-
     postUsers = CreateUser.Field()
     updateUser = UpdateUser.Field()
     deleteUser = DeleteUser.Field()
     
     # products_ms c# firebase
-    
     postProduct = CreateProduct.Field()
     updateProduct = UpdateProduct.Field()
     deleteProduct = DeleteProduct.Field()
