@@ -146,7 +146,7 @@ def checkPhone(phone):
         return None
 
 
-def calculateBalanceForUser(id, senderPhone):
+def calculateBalanceForUser(id):
     balance = 0
     try:
         transactions = getTransactionsForUserResolve(id)
@@ -158,7 +158,7 @@ def calculateBalanceForUser(id, senderPhone):
     except:
         pass
     try:
-        recharges = getRechargesResolve(senderPhone)
+        recharges = getRechargesResolve(id)
         for recharge in recharges:
             balance += float(recharge.amount)
     except:
@@ -358,7 +358,8 @@ class CreateUser(graphene.Mutation):
 
         url = f"{urlUsers}"
         response = requests.post(url, json=data)
-
+        data = response.json()
+        print(response.status_code)
         if response.status_code == 201:
             user = User(
                 first_name,
@@ -373,22 +374,24 @@ class CreateUser(graphene.Mutation):
             raise GraphQLError('Hubo un error al realizar la petición')
 
         # Crear usuario en auth_ms
-        userId = 
+        userId = data['id']
 
+        print(userId)
         data = {
-            'username': username,
             'password': password,
-            'userId': userId
+            'userId': str(userId),
+            'username': username
         }
-
         route = "register"
         url = f"{urlAuth}{route}"
         response = requests.post(url, json=data)
-
         if response.status_code == 200:
+            print(response.status_code)
             return CreateUser(ok=True, user=user)
-        else:
-            raise GraphQLError('Hubo un error al realizar la petición')
+        if response.status_code == 400:
+            print(response.status_code)
+            raise GraphQLError(
+                'Hubo un error al realizar la petición: username ya existe')
 
 
 # Update user info
@@ -471,18 +474,21 @@ class DeleteUser(graphene.Mutation):
         # Borrar de users_ms
         url = f"{urlUsers}{id}"
         response = requests.delete(url)
-
+        if response.status_code == 404:
+            return DeleteUser(ok=True)
         if response.status_code == 204:
             pass
         else:
             raise GraphQLError('Hubo un error al realizar la petición')
-        
+
         # Borrar de auth_ms
         route = "delete/"
         url = f"{urlAuth}{route}{id}"
         response = requests.delete(url)
-
+        print(response.status_code)
         if response.status_code == 200:
+            return DeleteUser(ok=True)
+        if response.status_code == 400:
             return DeleteUser(ok=True)
         else:
             raise GraphQLError('Hubo un error al realizar la petición')
@@ -651,13 +657,15 @@ class AddTransaction(graphene.Mutation):
 
         sender_check = checkPhone(senderPhone)
         if sender_check is None:
-            raise GraphQLError(f'Sender with phone number {senderPhone} does not exist')
+            raise GraphQLError(f'Sender with phone number {
+                               senderPhone} does not exist')
 
         receiver_check = checkPhone(receiverPhone)
         if receiver_check is None:
-            raise GraphQLError(f'Receiver with phone number {receiverPhone} does not exist')
+            raise GraphQLError(f'El celular: {
+                               receiverPhone} no se encuentra registrado.')
 
-        sender_balance = calculateBalanceForUser(sender_check.id, senderPhone)
+        sender_balance = calculateBalanceForUser(sender_check.id)
         print(sender_balance)
 
         if sender_balance < amount:
