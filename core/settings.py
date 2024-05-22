@@ -27,6 +27,7 @@ DEBUG = True
 
 # ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(',')
 ALLOWED_HOSTS = [
+    '35.238.88.129',
     'chaza-wallet-ag-yerq2evawq-uc.a.run.app',
     'chaza-wallet-ag-ithgocyoua-uc.a.run.app',
     '127.0.0.1',
