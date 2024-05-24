@@ -40,6 +40,8 @@ ALLOWED_HOSTS = [
 
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:9000',
+    'http://34.123.175.237:9000',
+    'https://34.123.175.237:9000',
     'https://chaza-wallet-ag-ithgocyoua-uc.a.run.app',
 ]
 # Application definition
