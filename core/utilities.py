@@ -359,6 +359,7 @@ class CreateUser(graphene.Mutation):
         }
 
         url = f"{urlUsers}"
+        print("urlUsers" + url)
         response = requests.post(url, json=data)
         data = response.json()
         print(response.status_code)
@@ -378,7 +379,7 @@ class CreateUser(graphene.Mutation):
         # Crear usuario en auth_ms
         userId = data['id']
 
-        print(userId)
+        print("userid" + userId)
         data = {
             'password': password,
             'userId': str(userId),
@@ -386,7 +387,9 @@ class CreateUser(graphene.Mutation):
         }
         route = "register"
         url = f"{urlAuth}{route}"
+        print("urlAuth" + url)
         response = requests.post(url, json=data)
+        print("urlAuth respnse" + response)
         if response.status_code == 200:
             print(response.status_code)
 
