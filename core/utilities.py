@@ -379,7 +379,7 @@ class CreateUser(graphene.Mutation):
         # Crear usuario en auth_ms
         userId = data['id']
 
-        print("userid" + userId)
+        #print("userid" + userId)
         data = {
             'password': password,
             'userId': str(userId),
