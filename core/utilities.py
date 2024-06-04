@@ -389,7 +389,7 @@ class CreateUser(graphene.Mutation):
         url = f"{urlAuth}{route}"
         print("urlAuth" + url)
         response = requests.post(url, json=data)
-        print("urlAuth respnse" + response)
+        #print("urlAuth respnse" + response)
         if response.status_code == 200:
             print(response.status_code)
 
