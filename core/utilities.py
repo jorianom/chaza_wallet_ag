@@ -358,7 +358,7 @@ class CreateUser(graphene.Mutation):
             'document_number': document_number
         }
 
-        url = f"{urlUsers}"
+        url = urlUsers
         print("urlUsers" + url)
         response = requests.post(url, json=data)
         data = response.json()
